@@ -56,7 +56,7 @@ def gen():
         if sum(avaliacoes) == -1200:
             taxa_mutacao = 0.5
         elif sum(avaliacoes) >= -800:
-            taxa_mutacao = 0.05
+            taxa_mutacao = 0.005
 
         nova_populacao = [mutacao(cromossomo, taxa_mutacao) for cromossomo in
                           nova_populacao[2:]]
