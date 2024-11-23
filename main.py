@@ -8,7 +8,7 @@ if __name__ == '__main__':
         if i == 0:
             break
         elif i == 1:
-            rede = RedeNeural(entrada=9, ocultos=6, saida=9)
+            rede = RedeNeural(entrada=9, ocultos=12, saida=9)
             carregar_e_jogar('melhores.txt', rede)
         elif i == 2:
             gen()
