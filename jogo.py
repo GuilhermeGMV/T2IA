@@ -46,25 +46,19 @@ def atualizar_tabuleiro(tabuleiro, linha, coluna, jogador):
 
 
 def verificar_estado(tabuleiro):
-    for i in range(3):
-        if tabuleiro[i][0] == tabuleiro[i][1] == tabuleiro[i][2] and tabuleiro[i][0] != ' ':
-            return True
-        if tabuleiro[0][i] == tabuleiro[1][i] == tabuleiro[2][i] and tabuleiro[0][i] != ' ':
-            return True
+    for linha in tabuleiro:
+        if linha[0] == linha[1] == linha[2] and linha[0] != ' ':
+            return linha[0]
+    for col in range(3):
+        if tabuleiro[0][col] == tabuleiro[1][col] == tabuleiro[2][col] and tabuleiro[0][col] != ' ':
+            return tabuleiro[0][col]
     if tabuleiro[0][0] == tabuleiro[1][1] == tabuleiro[2][2] and tabuleiro[0][0] != ' ':
-        return True
+        return tabuleiro[0][0]
     if tabuleiro[0][2] == tabuleiro[1][1] == tabuleiro[2][0] and tabuleiro[0][2] != ' ':
-        return True
-    return False
-
-
-def verificar_estado_ia(model, tabuleiro):
-    tabuleiro_flat = np.array(tabuleiro).flatten()
-    tabuleiro_flat = [map_input[x.lower()] if x != ' ' else map_input['b'] for x in tabuleiro_flat]
-    colunas = [str(i) for i in range(1, 10)]
-    tabuleiro_df = pd.DataFrame([tabuleiro_flat], columns=colunas)
-    predicao = model.predict(tabuleiro_df)[0]
-    return map_output_reverse[predicao]
+        return tabuleiro[0][2]
+    if all(cell != ' ' for row in tabuleiro for cell in row):
+        return "Empate"
+    return None
 
 
 def minimax(tabuleiro, profundidade, is_maximizing, jogador_ia, jogador_humano):
@@ -129,7 +123,7 @@ def jogada_maquina(tabuleiro, jogador_ia, jogador_humano, dificuldade):
             tabuleiro[linha][coluna] = jogador_ia
 
 
-def jogar_jogo(model):
+def jogar_jogo():
     tabuleiro = inicializar_tabuleiro()
     jogador_escolha = escolher_simbolo()
     dificuldade = escolher_dificuldade()
@@ -150,57 +144,82 @@ def jogar_jogo(model):
                 continue
 
             n_jogadas += 1
-            estado_ia = verificar_estado_ia(model, tabuleiro)
             estado = verificar_estado(tabuleiro)
             mostrar_tabuleiro(tabuleiro)
 
-            if estado_ia == "continue":
-                print("Previsão do modelo: ")
-                print("Continue")
-            elif estado_ia == "positive":
-                print("Previsão do modelo: ")
-                print("X venceu")
-            elif estado_ia == "negative":
-                print("Previsão do modelo: ")
-                print("O venceu")
-            elif estado_ia == "tie":
-                print("Previsão do modelo: ")
-                print("empate")
-
             if estado:
-                print("Estado real do jogo: ")
-                print(f"Jogador {jogador_humano} venceu!")
-                break
-            elif n_jogadas == 9:
-                print("Estado real do jogo: ")
-                print("O jogo terminou em empate!")
-                break
+                if estado == jogador_ia:
+                    print("Estado real do jogo: ")
+                    print(f"Jogador {jogador_ia} venceu!")
+                    break
+                elif estado == jogador_humano:
+                    print("Você venceu!")
+                else:
+                    print("Empate!")
         else:
             jogada_maquina(tabuleiro, jogador_ia, jogador_humano, dificuldade)
             n_jogadas += 1
-            estado_ia = verificar_estado_ia(model, tabuleiro)
             estado = verificar_estado(tabuleiro)
             mostrar_tabuleiro(tabuleiro)
 
-            if estado_ia == "continue":
-                print("Previsão do modelo: ")
-                print("Continue")
-            elif estado_ia == "positive":
-                print("Previsão do modelo: ")
-                print("X venceu")
-            elif estado_ia == "negative":
-                print("Previsão do modelo: ")
-                print("O venceu")
-            elif estado_ia == "tie":
-                print("Previsão do modelo: ")
-                print("empate")
-
             if estado:
-                print("Estado real do jogo: ")
-                print(f"Jogador {jogador_ia} venceu!")
-                break
-            elif n_jogadas == 9:
-                print("Estado real do jogo: ")
-                print("O jogo terminou em empate!")
-                break
+                if estado == jogador_ia:
+                    print("Estado real do jogo: ")
+                    print(f"Jogador {jogador_ia} venceu!")
+                    break
+                elif estado == jogador_humano:
+                    print("Você venceu!")
+                else:
+                    print("Empate!")
         turno_jogador = not turno_jogador
+
+
+def jogar_contra_rede(rede):
+    tabuleiro = inicializar_tabuleiro()
+    jogador_rede = 'X'
+    jogador_humano = 'O'
+    jogador_atual = "Rede"
+
+    print("Você é o jogador 'O'. A rede é o jogador 'X'. Boa sorte!")
+    mostrar_tabuleiro(tabuleiro)
+
+    while True:
+        if jogador_atual == "Rede":
+            entrada_rede = np.array(
+                [[1 if cell == 'X' else -1 if cell == 'O' else 0 for cell in row] for row in tabuleiro]
+            ).flatten()
+            saidas = rede.forward(entrada_rede)
+
+            indices_ordenados = np.argsort(-saidas)
+
+            for idx in indices_ordenados:
+                i, j = divmod(idx, 3)
+                if atualizar_tabuleiro(tabuleiro, i , j, jogador_rede):
+                    print("A rede jogou:")
+                    mostrar_tabuleiro(tabuleiro)
+                    break
+        else:
+            while True:
+                try:
+                    linha = int(input("Escolha a linha (0, 1, 2): "))
+                    coluna = int(input("Escolha a coluna (0, 1, 2): "))
+                    if atualizar_tabuleiro(tabuleiro, linha, coluna, jogador_humano, ):
+                        print("Sua jogada:")
+                        mostrar_tabuleiro(tabuleiro)
+                        break
+                    else:
+                        print("Posição inválida. Tente novamente.")
+                except (ValueError, IndexError):
+                    print("Entrada inválida. Certifique-se de digitar dois números separados por espaço (ex: 1 2).")
+
+        estado = verificar_estado(tabuleiro)
+        if estado:
+            if estado == jogador_rede:
+                print("A rede venceu!")
+            elif estado == jogador_humano:
+                print("Você venceu!")
+            else:
+                print("Empate!")
+            break
+
+        jogador_atual = "Minimax" if jogador_atual == "Rede" else "Rede"
