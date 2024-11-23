@@ -8,8 +8,8 @@ from RedeNeural import RedeNeural
 
 def gen():
     tamanho_populacao = 10
-    num_pesos = 123
-    rede = RedeNeural(entrada=9, ocultos=6, saida=9)
+    num_pesos = 237
+    rede = RedeNeural(entrada=9, ocultos=12, saida=9)
     populacao = inicializar_populacao(tamanho_populacao, num_pesos)
 
     for geracao in range(300):
