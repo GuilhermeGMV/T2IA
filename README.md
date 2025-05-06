@@ -2,7 +2,7 @@
 ### 📌 Project Overview
 This project implements a Reinforcement Learning approach to train a Neural Network (NN) to play Tic-Tac-Toe. The network is trained using a Genetic Algorithm (GA), not backpropagation. As an opponent and trainer, the Minimax algorithm is used with varying difficulty levels.
 
-This work was developed for the Artificial Intelligence course at PUCRS, under the supervision of Professor Silvia Moraes.
+This work was developed for the Artificial Intelligence course at [PUCRS](https://portal.pucrs.br/), under the supervision of Professor Silvia Moraes.
 
 ## 🧠 How It Works
 ### 🕹 Minimax Difficulty Modes
